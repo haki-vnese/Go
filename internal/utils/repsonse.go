@@ -14,7 +14,7 @@ func Response(c *gin.Context, statusCode int, message string, data interface{}) 
 	})
 }
 
-func ResponseError(c *gin.Context, statusCode int, message string) {
+func ResponseError(c *gin.Context, statusCode int, message interface{}) {
 	c.JSON(statusCode, gin.H{
 		"status":  statusCode,
 		"message": message,

@@ -15,7 +15,7 @@ func NewEmployeeRepository() *EmployeeRepository {
 	}
 }
 
-var idCounter = 1 // idCounter is a variable that simulates an auto-incrementing ID for new employees
+var idCounter = 0 // idCounter is a variable that simulates an auto-incrementing ID for new employees
 
 func (r *EmployeeRepository) Create(e *domain.Employee) error {
 	// Simulate creating an employee by adding it to the map

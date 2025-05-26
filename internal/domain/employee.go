@@ -5,8 +5,8 @@ package domain
 
 type Employee struct {
 	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
 	Position string `json:"position"`
 }
 

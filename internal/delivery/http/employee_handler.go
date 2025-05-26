@@ -1,10 +1,14 @@
 package http
 
 import (
+	"errors"
+	"fmt"
 	"go-rest-api/internal/domain"
 	"go-rest-api/internal/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,14 +33,26 @@ func NewEmployeeHandler(router *gin.Engine, uc domain.EmployeeUsecase) {
 
 // CreateEmployee handles the HTTP request to create a new employee
 func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
-	var employee domain.Employee                        // Create a new Employee struct to hold the request data
+	var employee domain.Employee // Create a new Employee struct to hold the request data
+
 	if err := c.ShouldBindJSON(&employee); err != nil { // Bind the JSON request data to the Employee struct
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) { // Check if the error is a validation error
+			// Create a formatted error message for validation errors
+			output := make([]string, len(ve))
+			for i, fe := range ve {
+				output[i] = fmt.Sprintf("Field '%s' failed validation: %s", fe.Field(), fe.Tag())
+			}
+			utils.ResponseError(c, http.StatusBadRequest, output) // Return a bad request error with the validation messages
+			return
+		}
 		utils.ResponseError(c, http.StatusBadRequest, err.Error()) // Return a bad request error if binding fails
 		return
 	}
 
-	if err := h.usecase.Create(&employee); err != nil { // Call the use case to create the employee
-		utils.ResponseError(c, http.StatusInternalServerError, err.Error()) // Return an internal server error if creation fails
+	// Call usecase to create
+	if err := h.usecase.Create(&employee); err != nil {
+		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -74,11 +90,21 @@ func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
 		utils.ResponseError(c, http.StatusBadRequest, err.Error()) // Return a bad request error if conversion fails
 		return
 	}
-	var employee domain.Employee                        // Create a new Employee struct to hold the request data
-	if err := c.ShouldBindJSON(&employee); err != nil { // Bind the JSON request data to the Employee struct
-		utils.ResponseError(c, http.StatusBadRequest, err.Error()) // Return a bad request error if binding fails
+	var employee domain.Employee // Create a new Employee struct to hold the request data
+	if err := c.ShouldBindJSON(&employee); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			output := make([]string, len(ve))
+			for i, fe := range ve {
+				output[i] = fmt.Sprintf("Field '%s' failed validation: %s", fe.Field(), fe.Tag())
+			}
+			utils.ResponseError(c, http.StatusBadRequest, output)
+			return
+		}
+		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
+
 	employee.ID = intID // Set the ID of the employee to the ID from the URL parameter
 
 	if err := h.usecase.Update(&employee); err != nil { // Call the use case to update the employee
