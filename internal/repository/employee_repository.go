@@ -35,7 +35,7 @@ func (r *EmployeeRepository) GetByID(id int) (*domain.Employee, error) {
 }
 
 func (r *EmployeeRepository) GetAll() ([]domain.Employee, error) {
-	employees := make([]domain.Employee, 0, len(r.db))
+	employees := make([]domain.Employee, 0, len(r.db)) // create a temp array of Employee to avoid making changes to the original database
 	for _, emp := range r.db {
 		employees = append(employees, *emp)
 	}

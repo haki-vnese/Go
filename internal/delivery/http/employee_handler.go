@@ -37,7 +37,8 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&employee); err != nil { // Bind the JSON request data to the Employee struct
 		var ve validator.ValidationErrors
-		if errors.As(err, &ve) { // Check if the error is a validation error
+		if errors.As(err, &ve) { // Check if the error is a validation error -- errors.As checks if the error can be cast to a specific type
+			// If the error is a validation error, we can extract the validation errors
 			// Create a formatted error message for validation errors
 			output := make([]string, len(ve))
 			for i, fe := range ve {
